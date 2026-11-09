@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Campus Marketplace - DBMS Live Database Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-hover: #047857;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --badge-bg: #ecfdf5;
+      --badge-text: #065f46;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .header {
+      background: var(--card-bg);
+      padding: 20px 28px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid #a7f3d0;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fafafa;
+    }
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+      background: #ffffff;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .table-container {
+      overflow-x: auto;
+      max-height: 480px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    th {
+      background: #f8fafc;
+      padding: 12px 18px;
+      font-weight: 600;
+      color: var(--text);
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    td {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      color: #334155;
+    }
+    tr:nth-child(even) td {
+      background: #fcfcfd;
+    }
+    tr:hover td {
+      background: #f1f5f9;
+    }
+    .sql-editor-card {
+      margin-top: 24px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+    .sql-textarea {
+      width: 100%;
+      height: 90px;
+      font-family: 'Fira Code', monospace;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      color: #0f172a;
+      background: #f8fafc;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+    .sql-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .btn-run {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-run:hover {
+      background: var(--primary-hover);
+    }
+    .quick-queries {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .chip {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .chip:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+    .badge {
+      background: #e0e7ff;
+      color: #3730a3;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>🎓 Smart Campus Marketplace — MySQL Live Database Console</h1>
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">
+        Host: <strong>Aiven Cloud MySQL 8.4</strong> | Database: <strong>defaultdb</strong>
+      </p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <a href="http://localhost:5173" target="_blank" style="text-decoration: none; background: #f1f5f9; padding: 6px 14px; border-radius: 8px; color: #0f172a; font-weight: 500; font-size: 13px; border: 1px solid var(--border);">
+        ↗ Open Website (Port 5173)
+      </a>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        MySQL Connected (Port 15999)
+      </div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <div class="card-header">
+        <h2 id="table-title">Database Tables</h2>
+        <button onclick="refreshActiveTable()" class="chip" style="font-weight: 600;">🔄 Refresh Data</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="loadTable('products')">📦 products <span class="badge" id="badge-products">-</span></button>
+        <button class="tab-btn" onclick="loadTable('students')">👥 students <span class="badge" id="badge-students">-</span></button>
+        <button class="tab-btn" onclick="loadTable('categories')">🏷️ categories <span class="badge" id="badge-categories">-</span></button>
+        <button class="tab-btn" onclick="loadTable('wishlist')">❤️ wishlist <span class="badge" id="badge-wishlist">-</span></button>
+      </div>
+
+      <div class="table-container" id="table-wrapper">
+        <div style="padding: 40px; text-align: center; color: var(--text-muted);">Loading database records from Aiven Cloud MySQL...</div>
+      </div>
+    </div>
+
+    <!-- Interactive SQL Query Box for Miss -->
+    <div class="sql-editor-card">
+      <h2 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">⚡ Live SQL Query Console (Run SQL against Aiven MySQL)</h2>
+      <div class="quick-queries">
+        <span class="chip" onclick="setQuery('SELECT * FROM products;')">SELECT * FROM products</span>
+        <span class="chip" onclick="setQuery('SELECT p.product_name, p.price, c.category_name, s.name AS seller FROM products p INNER JOIN categories c ON p.category_id = c.category_id INNER JOIN students s ON p.student_id = s.student_id;')">INNER JOIN (Product + Category + Seller)</span>
+        <span class="chip" onclick="setQuery('SELECT c.category_name, COUNT(p.product_id) AS total_items, AVG(p.price) AS avg_price FROM categories c LEFT JOIN products p ON c.category_id = p.category_id GROUP BY c.category_id, c.category_name;')">GROUP BY Category & Average Price</span>
+        <span class="chip" onclick="setQuery('SELECT * FROM students ORDER BY year DESC;')">SELECT students ORDER BY year</span>
+      </div>
+      <textarea id="sql-input" class="sql-textarea">SELECT p.product_name, p.price, c.category_name, s.name AS seller_name FROM products p INNER JOIN categories c ON p.category_id = c.category_id INNER JOIN students s ON p.student_id = s.student_id;</textarea>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button onclick="executeCustomSql()" class="btn-run">▶ Execute SQL Query</button>
+        <span id="query-status" style="font-size: 12px; color: var(--text-muted);"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTable = 'products';
+
+    function setQuery(sql) {
+      document.getElementById('sql-input').value = sql;
+      executeCustomSql();
+    }
+
+    async function loadTable(tableName) {
+      currentTable = tableName;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.toLowerCase().includes(tableName));
+      });
+      document.getElementById('table-title').innerText = `Table: ${tableName}`;
+
+      try {
+        const res = await fetch(`/api/db-view/${tableName}`);
+        const data = await res.json();
+        if (!data.success) {
+          document.getElementById('table-wrapper').innerHTML = `<div style="padding: 24px; color: red;">Error: ${data.error}</div>`;
+          return;
+        }
+        renderTable(data.rows, data.fields);
+        updateBadges();
+      } catch (err) {
+        document.getElementById('table-wrapper').innerHTML = `<div style="padding: 24px; color: red;">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function refreshActiveTable() {
+      loadTable(currentTable);
+    }
+
+    function renderTable(rows, fields) {
+      if (!rows || rows.length === 0) {
+        document.getElementById('table-wrapper').innerHTML = `<div style="padding: 30px; text-align: center; color: var(--text-muted);">No records found in table.</div>`;
+        return;
+      }
+      const cols = fields && fields.length ? fields : Object.keys(rows[0]);
+      let html = '<table><thead><tr>';
+      cols.forEach(c => html += `<th>${c}</th>`);
+      html += '</tr></thead><tbody>';
+
+      rows.forEach(r => {
+        html += '<tr>';
+        cols.forEach(c => {
+          let val = r[c];
+          if (val === null || val === undefined) val = '<em style="color:#94a3b8">NULL</em>';
+          else if (c === 'price') val = `<strong>₹${val}</strong>`;
+          else if (typeof val === 'string' && val.startsWith('http')) val = `<a href="${val}" target="_blank" style="color:var(--primary); font-size:11px;">View Link</a>`;
+          html += `<td>${val}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('table-wrapper').innerHTML = html;
+    }
+
+    async function updateBadges() {
+      ['products', 'students', 'categories', 'wishlist'].forEach(async (t) => {
+        try {
+          const res = await fetch(`/api/db-view/${t}`);
+          const data = await res.json();
+          if (data.success && data.rows) {
+            const el = document.getElementById(`badge-${t}`);
+            if (el) el.innerText = data.rows.length;
+          }
+        } catch(e) {}
+      });
+    }
+
+    async function executeCustomSql() {
+      const sql = document.getElementById('sql-input').value.trim();
+      const statusEl = document.getElementById('query-status');
+      statusEl.innerText = "Executing on Aiven Cloud...";
+      try {
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sql })
+        });
+        const data = await res.json();
+        if (data.success) {
+          statusEl.innerText = `✅ Query executed successfully (${data.rows.length} rows returned)`;
+          statusEl.style.color = '#10b981';
+          document.getElementById('table-title').innerText = "Query Results";
+          renderTable(data.rows, data.fields);
+        } else {
+          statusEl.innerText = `❌ Error: ${data.error}`;
+          statusEl.style.color = '#ef4444';
+        }
+      } catch (err) {
+        statusEl.innerText = `❌ Failed: ${err.message}`;
+        statusEl.style.color = '#ef4444';
+      }
+    }
+
+    // Initial Load
+    loadTable('products');
+  </script>
+</body>
+</html>
